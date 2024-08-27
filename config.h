@@ -62,6 +62,20 @@ static const char* roficmd[] = { "rofi", "-show", "drun", NULL };
 static const char *termcmd[]  = { "alacritty", NULL };
 static const char *scrotcmd[] = { "scrot", "-s", "/tmp/%F_%T_$wx$h.png", "-e", "xclip -selection clipboard -target image/png -i $f", NULL };
 
+void spawn_vol(const Arg *arg) {
+	spawn(arg);
+	Arg show_vol = SHCMD("notify-send -t 1000 \"Volume: $(pamixer --get-volume-human)\"");
+	spawn((const Arg*)&show_vol);
+}
+
+void spawn_light(const Arg *arg) {
+	spawn(arg);
+	Arg show_light = SHCMD("notify-send -t 1000 \"Brightness: $(light -G)\"");
+	spawn((const Arg*)&show_light);
+}
+
+#include <X11/XF86keysym.h>
+
 static const Key keys[] = {
 	/* modifier                     key        function        argument */
 	{ MODKEY,                       XK_d,      spawn,          {.v = dmenucmd } },
@@ -69,6 +83,11 @@ static const Key keys[] = {
 	{ MODKEY,             		XK_Return, spawn,          {.v = termcmd } },
 	{ MODKEY|ShiftMask,             XK_s,      spawn,          {.v = scrotcmd } },
 	{ MODKEY,                       XK_q,      killclient,     {0} },
+	{ 0,				XF86XK_AudioMute, spawn_vol, SHCMD("pamixer -t") },
+	{ 0,				XF86XK_AudioLowerVolume, spawn_vol, SHCMD("pamixer -d 5") },
+	{ 0,				XF86XK_AudioRaiseVolume, spawn_vol, SHCMD("pamixer -i 5") },
+	{ 0,				XF86XK_MonBrightnessUp, spawn_light, SHCMD("light -A 5") },
+	{ 0,				XF86XK_MonBrightnessDown, spawn_light, SHCMD("light -U 5") },
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
 	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
